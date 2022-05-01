@@ -44,9 +44,10 @@ def calc_global_rank(frame: DataFrame, order_by: Union[str, list[str]]) -> DataF
     """Calculate global ranks.
     This function uses a smart algorithm to avoding shuffling all rows
     to a single node which causes OOM.
-    :param frame: A PySpark DataFrame. 
-    :param order_by: The columns to sort the DataFrame by. 
-    :return: A DataFrame with new columns ("part_id", "local_rank", "cum_rank", "sum_factor" and "rank") added.
+    :param frame: A PySpark DataFrame.
+    :param order_by: The columns to sort the DataFrame by.
+    :return: A DataFrame with new columns
+        ("part_id", "local_rank", "cum_rank", "sum_factor" and "rank") added.
     """
     if isinstance(order_by, str):
         order_by = [order_by]
@@ -90,15 +91,15 @@ def repart_hdfs(
     coalesce: bool = False
 ) -> None:
     """Repartition a HDFS path of the Parquet format.
-    :param spark: A SparkSession object. 
-    :param path: The HDFS path to repartition. 
-    :param num_parts: The new number of partitions. 
+    :param spark: A SparkSession object.
+    :param path: The HDFS path to repartition.
+    :param num_parts: The new number of partitions.
     :param coalesce: If True, use coalesce instead of repartition.
     """
-    sc = spark.sparkContext
-    hdfs = sc._jvm.org.apache.hadoop.fs.FileSystem.get(sc._jsc.hadoopConfiguration())  # pylint: disable=W0212
+    spc = spark.sparkContext
+    hdfs = spc._jvm.org.apache.hadoop.fs.FileSystem.get(spc._jsc.hadoopConfiguration())  # pylint: disable=W0212
     src_path = src_path.rstrip("/")
-    src_path_hdfs = sc._jvm.org.apache.hadoop.fs.Path(src_path)  # pylint: disable=W0212
+    src_path_hdfs = spc._jvm.org.apache.hadoop.fs.Path(src_path)  # pylint: disable=W0212
     # num of partitions
     if num_parts is None:
         bytes_path = hdfs.getContentSummary(src_path_hdfs).getLength()
@@ -124,7 +125,7 @@ def repart_hdfs(
         return
     if hdfs.delete(src_path_hdfs, True):
         if not hdfs.rename(
-            sc._jvm.org.apache.hadoop.fs.Path(path_tmp),  # pylint: disable=W0212
+            spc._jvm.org.apache.hadoop.fs.Path(path_tmp),  # pylint: disable=W0212
             src_path_hdfs,  # pylint: disable=W0212
         ):
             sys.exit(f"Failed to rename the HDFS path {path_tmp} to {src_path}!")
