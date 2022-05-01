@@ -3,9 +3,14 @@
 from __future__ import annotations
 from typing import Optional, Union
 import sys
+from io import StringIO
 import datetime
-from pyspark.sql import DataFrame, Window
+import smtplib
+from email.mime.text import MIMEText
+from loguru import logger
+from pyspark.sql import SparkSession, DataFrame, Window
 import pyspark.sql.functions as sf
+import datacompy
 
 
 def sample(
@@ -39,9 +44,10 @@ def calc_global_rank(frame: DataFrame, order_by: Union[str, list[str]]) -> DataF
     """Calculate global ranks.
     This function uses a smart algorithm to avoding shuffling all rows
     to a single node which causes OOM.
-    :param frame: A PySpark DataFrame. 
-    :param order_by: The columns to sort the DataFrame by. 
-    :return: A DataFrame with new columns ("part_id", "local_rank", "cum_rank", "sum_factor" and "rank") added.
+    :param frame: A PySpark DataFrame.
+    :param order_by: The columns to sort the DataFrame by.
+    :return: A DataFrame with new columns
+        ("part_id", "local_rank", "cum_rank", "sum_factor" and "rank") added.
     """
     if isinstance(order_by, str):
         order_by = [order_by]
@@ -85,15 +91,15 @@ def repart_hdfs(
     coalesce: bool = False
 ) -> None:
     """Repartition a HDFS path of the Parquet format.
-    :param spark: A SparkSession object. 
-    :param path: The HDFS path to repartition. 
-    :param num_parts: The new number of partitions. 
+    :param spark: A SparkSession object.
+    :param path: The HDFS path to repartition.
+    :param num_parts: The new number of partitions.
     :param coalesce: If True, use coalesce instead of repartition.
     """
-    sc = spark.sparkContext
-    hdfs = sc._jvm.org.apache.hadoop.fs.FileSystem.get(sc._jsc.hadoopConfiguration())  # pylint: disable=W0212
+    spc = spark.sparkContext
+    hdfs = spc._jvm.org.apache.hadoop.fs.FileSystem.get(spc._jsc.hadoopConfiguration())  # pylint: disable=W0212
     src_path = src_path.rstrip("/")
-    src_path_hdfs = sc._jvm.org.apache.hadoop.fs.Path(src_path)  # pylint: disable=W0212
+    src_path_hdfs = spc._jvm.org.apache.hadoop.fs.Path(src_path)  # pylint: disable=W0212
     # num of partitions
     if num_parts is None:
         bytes_path = hdfs.getContentSummary(src_path_hdfs).getLength()
@@ -119,9 +125,82 @@ def repart_hdfs(
         return
     if hdfs.delete(src_path_hdfs, True):
         if not hdfs.rename(
-            sc._jvm.org.apache.hadoop.fs.Path(path_tmp),  # pylint: disable=W0212
+            spc._jvm.org.apache.hadoop.fs.Path(path_tmp),  # pylint: disable=W0212
             src_path_hdfs,  # pylint: disable=W0212
         ):
             sys.exit(f"Failed to rename the HDFS path {path_tmp} to {src_path}!")
     else:
         sys.exit(f"Failed to remove the (old) HDFS path: {src_path}!")
+
+
+def send_email(
+    server: str,
+    sender: str,
+    recipient: Union[str, list[str]],
+    subject: str,
+    body: str,
+) -> bool:
+    """Send email using a authentication free SMTP server.
+
+    :param server: A SMTP server which does not require authentication.
+    :param sender: The email address of the sender.
+    :param recipient: A (list of) email addresses to send the email to.
+    :param subject: The subject of the email.
+    :param body: The body of the email.
+    :return: True if the email is sent successfully, and False otherwise.
+    """
+    mail = MIMEText(body, "plain", "utf-8")
+    mail["Subject"] = subject
+    if isinstance(recipient, list):
+        recipient = ";".join(recipient)
+    mail["To"] = recipient
+    mail["From"] = sender
+    smtp = smtplib.SMTP()
+    try:
+        smtp.connect(server)
+        smtp.send_message(mail)
+        smtp.close()
+        logger.info("The following message is sent: {}", mail.as_string())
+        return True
+    except:
+        logger.info(
+            "The following message is constructed but failed to sent: {}",
+            mail.as_string()
+        )
+        return False
+
+
+def compare_dataframes(
+    spark: SparkSession, df1: DataFrame, df2: DataFrame,
+    join_columns: Union[str, list[str]], email: Optional[dict[str, str]]
+):
+    """Compare two Spark DataFrames for differences.
+
+    :param spark: A SparkSession object.
+    :param df1: A Spark DataFrame to compare.
+    :param df2: Another Spark DataFrame to comapre.
+    :param join_columns: A (list of) column(s) for joining the 2 DataFrames.
+    :param email: An optional dictionary object containing information for sending emails.
+        The dictionary should contain all parameters of the send_email function.
+    """
+    if isinstance(join_columns, str):
+        join_columns = [join_columns]
+    comparison = datacompy.SparkCompare(
+        spark,
+        df1,
+        df2,
+        join_columns=join_columns,
+        cache_intermediates=True,
+        match_rates=True
+    )
+    with StringIO() as sio:
+        comparison.report(file=sio)
+        report = sio.getvalue()
+    logger.info("\n" + report)
+    send_email(
+        server=email["server"],
+        sender=email["sender"],
+        recipient=email["recipient"],
+        subject="DataFrame Comparison Report",
+        body=report,
+    )

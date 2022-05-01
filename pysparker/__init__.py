@@ -2,4 +2,4 @@
 """
 from .utils import sample, repart_hdfs, calc_global_rank
 
-__version__ = "0.0.1"
+__version__ = "0.1.0"
