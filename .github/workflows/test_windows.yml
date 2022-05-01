@@ -19,6 +19,7 @@ jobs:
           - "3.7"
           - "3.8"
           - "3.9"
+          - "3.10"
 
     steps:
     - uses: actions/checkout@v2
@@ -33,7 +34,7 @@ jobs:
         $env:Path += ";$env:Userprofile\.local\bin"
         $env:Path += ";$env:Userprofile\AppData\Roaming\Python\Scripts"
         poetry env use python
-        poetry install --no-dev -E all
+        poetry install --no-dev
         #poetry run pip3 install .
         #poetry run pip3 install docker yapf
         #poetry run pip3 install pytest
