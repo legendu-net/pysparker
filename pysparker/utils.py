@@ -4,8 +4,12 @@ from __future__ import annotations
 from typing import Optional, Union
 import sys
 import datetime
-from pyspark.sql import DataFrame, Window
+import smtplib
+from email.mime.text import MIMEText
+from loguru import logger
+from pyspark.sql import SparkSession, DataFrame, Window
 import pyspark.sql.functions as sf
+import datacompy
 
 
 def sample(
@@ -125,3 +129,64 @@ def repart_hdfs(
             sys.exit(f"Failed to rename the HDFS path {path_tmp} to {src_path}!")
     else:
         sys.exit(f"Failed to remove the (old) HDFS path: {src_path}!")
+
+
+def send_email(
+    server: str,
+    sender: str,
+    recipient: Union[str, List[str]],
+    subject: str,
+    body: str,
+) -> bool:
+    """Send email using a authentication free SMTP server.
+
+    :param server: A SMTP server which does not require authentication.
+    :param sender: The email address of the sender.
+    :param recipient: A (list of) email addresses to send the email to.
+    :param subject: The subject of the email.
+    :param body: The body of the email.
+    :return: True if the email is sent successfully, and False otherwise.
+    """
+    mail = MIMEText(body, "plain", "utf-8")
+    mail["Subject"] = subject
+    if isinstance(recipient, list):
+        recipient = ";".join(recipient)
+    mail["To"] = recipient
+    mail["From"] = sender
+    smtp = smtplib.SMTP()
+    try:
+        smtp.connect(server)
+        smtp.send_message(mail)
+        smtp.close()
+        logger.info("The following message is sent: {}", mail.as_string())
+        return True
+    except:
+        logger.info(
+            "The following message is constructed but failed to sent: {}",
+            mail.as_string()
+        )
+        return False
+
+
+def compare_dataframes(spark: SparkSession, df1: DataFrame, df2: DataFrame, join_columns: Union[str, list[str]], email: Optional[dict[str, str]]):
+    if isinstance(join_columns, str):
+        join_columns = [join_columns]
+    comparison = datacompy.SparkCompare(
+        spark,
+        df1,
+        df2,
+        join_columns=join_columns,
+        cache_intermediates=True,
+        match_rates=True
+    )
+    with StringIO() as sio:
+        comparison.report(file=sio)
+        report = sio.getvalue()
+    logger.info("\n" + report)
+    send_email(
+        server=email["server"],
+        sender=email["sender"],
+        recipient=email["recipient"],
+        subject="DataFrame Comparison Report",
+        body=report,
+    )
