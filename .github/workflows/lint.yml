@@ -30,7 +30,7 @@ jobs:
         xinstall --sudo pt -ic
         ~/.local/bin/poetry env use python3
         cat pyproject.toml
-        ~/.local/bin/poetry install -E all
+        ~/.local/bin/poetry install
     - name: Lint with pylint
       run: |
         ~/.local/bin/poetry run pylint -E dsutil/
