@@ -3,6 +3,7 @@
 from __future__ import annotations
 from typing import Optional, Union
 import sys
+from io import StringIO
 import datetime
 import smtplib
 from email.mime.text import MIMEText
@@ -134,7 +135,7 @@ def repart_hdfs(
 def send_email(
     server: str,
     sender: str,
-    recipient: Union[str, List[str]],
+    recipient: Union[str, list[str]],
     subject: str,
     body: str,
 ) -> bool:
@@ -168,7 +169,19 @@ def send_email(
         return False
 
 
-def compare_dataframes(spark: SparkSession, df1: DataFrame, df2: DataFrame, join_columns: Union[str, list[str]], email: Optional[dict[str, str]]):
+def compare_dataframes(
+    spark: SparkSession, df1: DataFrame, df2: DataFrame,
+    join_columns: Union[str, list[str]], email: Optional[dict[str, str]]
+):
+    """Compare two Spark DataFrames for differences.
+
+    :param spark: A SparkSession object.
+    :param df1: A Spark DataFrame to compare.
+    :param df2: Another Spark DataFrame to comapre.
+    :param join_columns: A (list of) column(s) for joining the 2 DataFrames.
+    :param email: An optional dictionary object containing information for sending emails.
+        The dictionary should contain all parameters of the send_email function.
+    """
     if isinstance(join_columns, str):
         join_columns = [join_columns]
     comparison = datacompy.SparkCompare(
