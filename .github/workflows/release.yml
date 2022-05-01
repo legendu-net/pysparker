@@ -27,4 +27,8 @@ jobs:
           prerelease: false
           files: |
             dist/*
+      - name: Publish to PyPI
+        run: | 
+          pip3 install twine
+          twine upload --verbose dist/* -u __token__ -p ${{ secrets.PYPI_PYSPARKER }}
   
