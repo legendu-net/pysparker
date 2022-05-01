@@ -16,6 +16,7 @@ pytype = { version = ">=2020.08.10", python = "<3.9" }
 darglint = ">=1.5.8"
 yapf = ">=0.32.0"
 pyspark = ">=3.0.1"
+pytest = ">=7.1.2"
 
 [tool.yapf]
 based_on_style = "facebook"
