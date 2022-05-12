@@ -8,7 +8,6 @@ This is a Python pacakage that contains misc utils for PySpark.
 |---------|------------|------------|------------|-------------|
 | Linux   | Y          | Y          | Y          | Y           |
 | macOS   | Y          | Y          | Y          | Y           |
-| Windows | Y          | Y          | Y          | Y           |
 
 ## Installation
 
