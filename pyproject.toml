@@ -3,6 +3,10 @@ name = "pysparker"
 version = "0.1.1"
 description = "Some utility functions for PySpark."
 authors = ["Ben Du <longendu@yahoo.com>"]
+license = "MIT"
+readme = "readme.md"
+repository = "https://github.com/legendu-net/pysparker"
+keywords = ["PySpark", "utils", "big data"]
 
 [tool.poetry.dependencies]
 python = ">=3.7.1,<3.11"
