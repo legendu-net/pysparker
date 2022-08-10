@@ -64,13 +64,13 @@ ordered-set = ">=4.0.2,<=4.1.0"
 pandas = ">=0.25.0,<=1.4.2"
 
 [package.extras]
-build = ["twine", "wheel"]
-dev = ["pytest", "pytest-cov", "pytest-spark", "sphinx", "sphinx-rtd-theme", "pre-commit", "black", "isort", "twine", "wheel"]
-docs = ["sphinx", "sphinx-rtd-theme"]
-edgetest = ["edgetest", "edgetest-conda"]
-qa = ["pre-commit", "black", "isort"]
+tests = ["pytest-spark", "pytest-cov", "pytest"]
 spark = ["pyspark (>=2.2.0)"]
-tests = ["pytest", "pytest-cov", "pytest-spark"]
+qa = ["isort", "black", "pre-commit"]
+edgetest = ["edgetest-conda", "edgetest"]
+docs = ["sphinx-rtd-theme", "sphinx"]
+dev = ["wheel", "twine", "isort", "black", "pre-commit", "sphinx-rtd-theme", "sphinx", "pytest-spark", "pytest-cov", "pytest"]
+build = ["wheel", "twine"]
 
 [[package]]
 name = "dill"
@@ -168,7 +168,7 @@ typing-extensions = ">=3.7.4.2"
 typing-inspect = ">=0.4.0"
 
 [package.extras]
-dev = ["black (==21.10b0)", "coverage (>=4.5.4)", "fixit (==0.1.1)", "flake8 (>=3.7.8)", "hypothesis (>=4.36.0)", "hypothesmith (>=0.0.4)", "jupyter (>=1.0.0)", "maturin (>=0.8.3,<0.9)", "nbsphinx (>=0.4.2)", "prompt-toolkit (>=2.0.9)", "setuptools-scm (>=6.0.1)", "sphinx-rtd-theme (>=0.4.3)", "ufmt (==1.3)", "usort (==1.0.0rc1)", "setuptools-rust (>=0.12.1)", "slotscheck (>=0.7.1)", "pyre-check (==0.9.9)"]
+dev = ["pyre-check (==0.9.9)", "slotscheck (>=0.7.1)", "setuptools-rust (>=0.12.1)", "usort (==1.0.0rc1)", "ufmt (==1.3)", "sphinx-rtd-theme (>=0.4.3)", "setuptools-scm (>=6.0.1)", "prompt-toolkit (>=2.0.9)", "nbsphinx (>=0.4.2)", "maturin (>=0.8.3,<0.9)", "jupyter (>=1.0.0)", "hypothesmith (>=0.0.4)", "hypothesis (>=4.36.0)", "flake8 (>=3.7.8)", "fixit (==0.1.1)", "coverage (>=4.5.4)", "black (==21.10b0)"]
 
 [[package]]
 name = "loguru"
@@ -183,7 +183,7 @@ colorama = {version = ">=0.3.4", markers = "sys_platform == \"win32\""}
 win32-setctime = {version = ">=1.0.0", markers = "sys_platform == \"win32\""}
 
 [package.extras]
-dev = ["colorama (>=0.3.4)", "docutils (==0.16)", "flake8 (>=3.7.7)", "tox (>=3.9.0)", "pytest (>=4.6.2)", "pytest-cov (>=2.7.1)", "black (>=19.10b0)", "isort (>=5.1.1)", "Sphinx (>=4.1.1)", "sphinx-autobuild (>=0.7.1)", "sphinx-rtd-theme (>=0.4.3)"]
+dev = ["sphinx-rtd-theme (>=0.4.3)", "sphinx-autobuild (>=0.7.1)", "Sphinx (>=4.1.1)", "isort (>=5.1.1)", "black (>=19.10b0)", "pytest-cov (>=2.7.1)", "pytest (>=4.6.2)", "tox (>=3.9.0)", "flake8 (>=3.7.7)", "docutils (==0.16)", "colorama (>=0.3.4)"]
 
 [[package]]
 name = "mccabe"
@@ -302,8 +302,8 @@ python-versions = ">=3.6"
 importlib-metadata = {version = ">=0.12", markers = "python_version < \"3.8\""}
 
 [package.extras]
-dev = ["pre-commit", "tox"]
-testing = ["pytest", "pytest-benchmark"]
+testing = ["pytest-benchmark", "pytest"]
+dev = ["tox", "pre-commit"]
 
 [[package]]
 name = "py"
@@ -315,7 +315,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
 [[package]]
 name = "py4j"
-version = "0.10.9.3"
+version = "0.10.9.5"
 description = "Enables Python programs to dynamically access arbitrary Java objects"
 category = "dev"
 optional = false
@@ -371,14 +371,14 @@ diagrams = ["railroad-diagrams", "jinja2"]
 
 [[package]]
 name = "pyspark"
-version = "3.2.1"
+version = "3.2.2"
 description = "Apache Spark Python API"
 category = "dev"
 optional = false
 python-versions = ">=3.6"
 
 [package.dependencies]
-py4j = "0.10.9.3"
+py4j = "0.10.9.5"
 
 [package.extras]
 ml = ["numpy (>=1.7)"]
@@ -524,7 +524,7 @@ optional = false
 python-versions = ">=3.5"
 
 [package.extras]
-dev = ["pytest (>=4.6.2)", "black (>=19.3b0)"]
+dev = ["black (>=19.3b0)", "pytest (>=4.6.2)"]
 
 [[package]]
 name = "wrapt"
@@ -790,8 +790,8 @@ py = [
     {file = "py-1.11.0.tar.gz", hash = "sha256:51c75c4126074b472f746a24399ad32f6053d1b34b68d2fa41e558e6f4a98719"},
 ]
 py4j = [
-    {file = "py4j-0.10.9.3-py2.py3-none-any.whl", hash = "sha256:04f5b06917c0c8a81ab34121dda09a2ba1f74e96d59203c821d5cb7d28c35363"},
-    {file = "py4j-0.10.9.3.tar.gz", hash = "sha256:0d92844da4cb747155b9563c44fc322c9a1562b3ef0979ae692dbde732d784dd"},
+    {file = "py4j-0.10.9.5-py2.py3-none-any.whl", hash = "sha256:52d171a6a2b031d8a5d1de6efe451cf4f5baff1a2819aabc3741c8406539ba04"},
+    {file = "py4j-0.10.9.5.tar.gz", hash = "sha256:276a4a3c5a2154df1860ef3303a927460e02e97b047dc0a47c1c3fb8cce34db6"},
 ]
 pycodestyle = [
     {file = "pycodestyle-2.8.0-py2.py3-none-any.whl", hash = "sha256:720f8b39dde8b293825e7ff02c475f3077124006db4f440dcbc9a20b76548a20"},
@@ -810,7 +810,7 @@ pyparsing = [
     {file = "pyparsing-3.0.8.tar.gz", hash = "sha256:7bf433498c016c4314268d95df76c81b842a4cb2b276fa3312cfb1e1d85f6954"},
 ]
 pyspark = [
-    {file = "pyspark-3.2.1.tar.gz", hash = "sha256:0b81359262ec6e9ac78c353344e7de026027d140c6def949ff0d80ab70f89a54"},
+    {file = "pyspark-3.2.2.tar.gz", hash = "sha256:5455214cf0b83d4a184cda25ca3b0812481915353b180cf7d7ac227728a4d99e"},
 ]
 pytest = [
     {file = "pytest-7.1.2-py3-none-any.whl", hash = "sha256:13d0e3ccfc2b6e26be000cb6568c832ba67ba32e719443bfe725814d3c42433c"},
