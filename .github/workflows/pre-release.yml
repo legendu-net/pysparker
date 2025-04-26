@@ -5,21 +5,21 @@ on:
 jobs:
   pre-release:
     name: Pre Release
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     permissions:
       issues: write
       pull-requests: write
       contents: write
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@latest
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@latest
         with:
-          python-version: 3.7
+          python-version: "3.12"
       - name: Install Poetry
         run: |
-          pip3 install -U xinstall
-          xinstall pt -ic
+          curl -sSL https://raw.githubusercontent.com/legendu-net/icon/main/install_icon.sh | sudo bash -
+          icon pt -ic
       - name: Build Package
         run: |
           ~/.local/bin/poetry build
