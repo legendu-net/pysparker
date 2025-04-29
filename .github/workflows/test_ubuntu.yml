@@ -17,7 +17,7 @@ jobs:
           - "3.12"
 
     steps:
-    - uses: actions/checkout@latest
+    - uses: actions/checkout@v4
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@latest
       with:
