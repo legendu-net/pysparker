@@ -162,7 +162,7 @@ def send_email(
         smtp.close()
         logger.info("The following message is sent: {}", mail.as_string())
         return True
-    except:
+    except Exception:
         logger.info(
             "The following message is constructed but failed to sent: {}",
             mail.as_string()

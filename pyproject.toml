@@ -4,7 +4,7 @@ version = "0.1.1"
 description = "Some utility functions for PySpark."
 authors = ["Ben Du <longendu@yahoo.com>"]
 license = "MIT"
-readme = "readme.md"
+readme = "README.md"
 repository = "https://github.com/legendu-net/pysparker"
 keywords = ["PySpark", "utils", "big data"]
 
