@@ -1,5 +1,5 @@
-"""Utils functions for Hadoop.
-"""
+"""Utils functions for Hadoop."""
+
 from __future__ import annotations
 from typing import Optional, Union
 import sys
@@ -17,7 +17,7 @@ def sample(
     frame: DataFrame,
     ratio: Union[float, int],
     total: Union[int, None] = None,
-    persist: bool = False
+    persist: bool = False,
 ) -> DataFrame:
     """Sample rows from a PySpark DataFrame.
     :param frame: The PySpark DataFrame from which to sample rows.
@@ -53,32 +53,39 @@ def calc_global_rank(frame: DataFrame, order_by: Union[str, list[str]]) -> DataF
         order_by = [order_by]
     # calculate local rank
     wspec1 = Window.partitionBy("part_id").orderBy(*order_by)
-    frame_local_rank = frame.orderBy(order_by).withColumn(
-        "part_id", sf.spark_partition_id()
-    ).withColumn("local_rank",
-                 sf.rank().over(wspec1)).persist()
+    frame_local_rank = (
+        frame.orderBy(order_by)
+        .withColumn("part_id", sf.spark_partition_id())
+        .withColumn("local_rank", sf.rank().over(wspec1))
+        .persist()
+    )
     # calculate accumulative rank
     wspec2 = Window.orderBy("part_id").rowsBetween(
         Window.unboundedPreceding, Window.currentRow
     )
-    stat = frame_local_rank.groupBy("part_id").agg(
-        sf.max("local_rank").alias("max_rank")
-    ).withColumn("cum_rank",
-                 sf.sum("max_rank").over(wspec2))
+    stat = (
+        frame_local_rank.groupBy("part_id")
+        .agg(sf.max("local_rank").alias("max_rank"))
+        .withColumn("cum_rank", sf.sum("max_rank").over(wspec2))
+    )
     # self join and shift 1 row to get sum factor
-    stat2 = stat.alias("l").join(
-        stat.alias("r"),
-        sf.col("l.part_id") == sf.col("r.part_id") + 1, "left_outer"
-    ).select(
-        sf.col("l.part_id"),
-        sf.coalesce(sf.col("r.cum_rank"), sf.lit(0)).alias("sum_factor")
+    stat2 = (
+        stat.alias("l")
+        .join(
+            stat.alias("r"),
+            sf.col("l.part_id") == sf.col("r.part_id") + 1,
+            "left_outer",
+        )
+        .select(
+            sf.col("l.part_id"),
+            sf.coalesce(sf.col("r.cum_rank"), sf.lit(0)).alias("sum_factor"),
+        )
     )
     return frame_local_rank.join(
-        #broadcast(stat2),
+        # broadcast(stat2),
         stat2,
         ["part_id"],
-    ).withColumn("rank",
-                 sf.col("local_rank") + sf.col("sum_factor"))
+    ).withColumn("rank", sf.col("local_rank") + sf.col("sum_factor"))
 
 
 def repart_hdfs(
@@ -88,7 +95,7 @@ def repart_hdfs(
     num_parts: Optional[int] = None,
     mb_per_part: float = 64,
     min_num_parts: int = 1,
-    coalesce: bool = False
+    coalesce: bool = False,
 ) -> None:
     """Repartition a HDFS path of the Parquet format.
     :param spark: A SparkSession object.
@@ -115,11 +122,13 @@ def repart_hdfs(
         path_tmp = src_path + f"_repart_tmp_{ts}"
     # repartition
     if coalesce:
-        spark.read.parquet(src_path).coalesce(num_parts) \
-            .write.mode("overwrite").parquet(path_tmp)
+        spark.read.parquet(src_path).coalesce(num_parts).write.mode(
+            "overwrite"
+        ).parquet(path_tmp)
     else:
-        spark.read.parquet(src_path).repartition(num_parts) \
-            .write.mode("overwrite").parquet(path_tmp)
+        spark.read.parquet(src_path).repartition(num_parts).write.mode(
+            "overwrite"
+        ).parquet(path_tmp)
     # path_tmp --> src_path
     if dst_path:
         return
@@ -165,14 +174,17 @@ def send_email(
     except Exception:
         logger.info(
             "The following message is constructed but failed to sent: {}",
-            mail.as_string()
+            mail.as_string(),
         )
         return False
 
 
 def compare_dataframes(
-    spark: SparkSession, df1: DataFrame, df2: DataFrame,
-    join_columns: Union[str, list[str]], email: Optional[dict[str, str]]
+    spark: SparkSession,
+    df1: DataFrame,
+    df2: DataFrame,
+    join_columns: Union[str, list[str]],
+    email: Optional[dict[str, str]],
 ):
     """Compare two Spark DataFrames for differences.
 
@@ -191,7 +203,7 @@ def compare_dataframes(
         df2,
         join_columns=join_columns,
         cache_intermediates=True,
-        match_rates=True
+        match_rates=True,
     )
     with StringIO() as sio:
         comparison.report(file=sio)
