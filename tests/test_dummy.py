@@ -1,5 +1,4 @@
-"""Test pysparker.
-"""
+"""Test pysparker."""
 
 
 def test_dummy():
