@@ -24,10 +24,8 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |
-        curl -sSL https://raw.githubusercontent.com/legendu-net/icon/main/install_icon.sh | sudo bash -
-        icon pt -ic
-        ~/.local/bin/poetry env use python3
-        ~/.local/bin/poetry install
+        curl -LsSf https://astral.sh/uv/install.sh | sh
+        ~/.local/bin/uv sync
     - name: Test with pytest
       run: |
-        ~/.local/bin/poetry run pytest
+        ~/.local/bin/uv run pytest
