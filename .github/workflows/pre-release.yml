@@ -16,13 +16,12 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Install Poetry
+      - name: Install uv
         run: |
-          curl -sSL https://raw.githubusercontent.com/legendu-net/icon/main/install_icon.sh | sudo bash -
-          icon pt -ic
+          curl -LsSf https://astral.sh/uv/install.sh | sh
       - name: Build Package
         run: |
-          ~/.local/bin/poetry build
+          ~/.local/bin/uv build
       - uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}

@@ -1,37 +1,29 @@
-[tool.poetry]
+[project]
 name = "pysparker"
 version = "0.1.1"
 description = "Some utility functions for PySpark."
-authors = ["Ben Du <longendu@yahoo.com>"]
-license = "MIT"
+authors = [{ name = "Ben Du", email = "longendu@yahoo.com" }]
+requires-python = ">=3.10,<3.13"
 readme = "README.md"
-repository = "https://github.com/legendu-net/pysparker"
-keywords = ["PySpark", "utils", "big data"]
+license = "MIT"
+keywords = [
+    "PySpark",
+    "utils",
+    "big data",
+]
+dependencies = [
+    "loguru>=0.6.0",
+    "datacompy>=0.8.1",
+]
 
-[tool.poetry.dependencies]
-python = ">=3.10,<3.13"
-loguru = ">=0.6.0"
-datacompy = ">=0.8.1"
+[project.urls]
+Repository = "https://github.com/legendu-net/pysparker"
 
-[tool.poetry.group.dev.dependencies]
-ruff = ">=0.11.7"
-pytype = { version = ">=2020.08.10" }
-pyspark = ">=3.0.1"
-pytest = ">=7.1.2"
+[dependency-groups]
+dev = [
+    "ruff>=0.11.7",
+    "pytype>=2020.08.10",
+    "pyspark>=3.0.1",
+    "pytest>=7.1.2",
+]
 
-[tool.pylint.master]
-ignore = ".venv,.ipynb_checkpoints"
-unsafe-load-any-extension = "no"
-extension-pkg-whitelist = "numpy,cv2,pyspark"
-generated-members = "sqlite3.*,cv2.*,pyspark.*"
-ignored-modules = "pyspark.sql.functions"
-
-[tool.pylint.typecheck]
-ignored-classes = "Namespace"
-
-[tool.pylint.messages_control]
-disable = "C0103,C0200,C0301,C0303,C0330,R0902,R0903,R0911,R0912,R0913,W0621,W0622,W0702,W0703,W1116"
-
-[build-system]
-requires = ["poetry>=1.0.0"]
-build-backend = "poetry.masonry.api"
