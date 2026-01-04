@@ -6,9 +6,12 @@ on:
     branches: [ dev, main ]
 jobs:
   test_code:
-    runs-on: macOS-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
+        os:
+          - macOS-latest
+          - ubuntu-latest
         python-version: 
           - "3.11"
           - "3.12"
@@ -19,8 +22,11 @@ jobs:
     - uses: actions/checkout@v6
     - name: Install dependencies
       run: |
+        if [[ "$(uname)" == *Darwin* ]]; then
+          printf "Running on macOS\n"
+          brew install libmagic && brew link libmagic
+        fi
         curl -LsSf https://astral.sh/uv/install.sh | sudo env UV_INSTALL_DIR="/usr/local/bin" sh
         uv sync --all-extras
-        brew install libmagic && brew link libmagic
     - name: Test with pytest
       run: uv run --python ${{ matrix.python-version }} pytest
