@@ -1,22 +1,20 @@
 """Utils functions for Hadoop."""
 
 from __future__ import annotations
-from typing import Optional, Union
 import sys
-from io import StringIO
 import datetime
 import smtplib
 from email.mime.text import MIMEText
 from loguru import logger
 from pyspark.sql import SparkSession, DataFrame, Window
 import pyspark.sql.functions as sf
-import datacompy
+from datacompy.spark.sql import SparkSQLCompare
 
 
 def sample(
     frame: DataFrame,
-    ratio: Union[float, int],
-    total: Union[int, None] = None,
+    ratio: float | int,
+    total: int | None = None,
     persist: bool = False,
 ) -> DataFrame:
     """Sample rows from a PySpark DataFrame.
@@ -40,7 +38,7 @@ def sample(
     return frame.sample(ratio)
 
 
-def calc_global_rank(frame: DataFrame, order_by: Union[str, list[str]]) -> DataFrame:
+def calc_global_rank(frame: DataFrame, order_by: str | list[str]) -> DataFrame:
     """Calculate global ranks.
     This function uses a smart algorithm to avoding shuffling all rows
     to a single node which causes OOM.
@@ -54,7 +52,7 @@ def calc_global_rank(frame: DataFrame, order_by: Union[str, list[str]]) -> DataF
     # calculate local rank
     wspec1 = Window.partitionBy("part_id").orderBy(*order_by)
     frame_local_rank = (
-        frame.orderBy(order_by)
+        frame.orderBy(order_by)  # ty: ignore[invalid-argument-type]
         .withColumn("part_id", sf.spark_partition_id())
         .withColumn("local_rank", sf.rank().over(wspec1))
         .persist()
@@ -92,7 +90,7 @@ def repart_hdfs(
     spark,
     src_path: str,
     dst_path: str = "",
-    num_parts: Optional[int] = None,
+    num_parts: int | None = None,
     mb_per_part: float = 64,
     min_num_parts: int = 1,
     coalesce: bool = False,
@@ -145,7 +143,7 @@ def repart_hdfs(
 def send_email(
     server: str,
     sender: str,
-    recipient: Union[str, list[str]],
+    recipient: str | list[str],
     subject: str,
     body: str,
 ) -> bool:
@@ -183,8 +181,8 @@ def compare_dataframes(
     spark: SparkSession,
     df1: DataFrame,
     df2: DataFrame,
-    join_columns: Union[str, list[str]],
-    email: Optional[dict[str, str]],
+    join_columns: str | list[str],
+    email: dict[str, str] | None,
 ):
     """Compare two Spark DataFrames for differences.
 
@@ -197,7 +195,7 @@ def compare_dataframes(
     """
     if isinstance(join_columns, str):
         join_columns = [join_columns]
-    comparison = datacompy.SparkCompare(
+    comparison = SparkSQLCompare(
         spark,
         df1,
         df2,
@@ -205,14 +203,13 @@ def compare_dataframes(
         cache_intermediates=True,
         match_rates=True,
     )
-    with StringIO() as sio:
-        comparison.report(file=sio)
-        report = sio.getvalue()
+    report = comparison.report()
     logger.info("\n" + report)
-    send_email(
-        server=email["server"],
-        sender=email["sender"],
-        recipient=email["recipient"],
-        subject="DataFrame Comparison Report",
-        body=report,
-    )
+    if email:
+        send_email(
+            server=email["server"],
+            sender=email["sender"],
+            recipient=email["recipient"],
+            subject="DataFrame Comparison Report",
+            body=report,
+        )

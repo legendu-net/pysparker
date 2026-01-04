@@ -3,7 +3,7 @@ name = "pysparker"
 version = "0.1.1"
 description = "Some utility functions for PySpark."
 authors = [{ name = "Ben Du", email = "longendu@yahoo.com" }]
-requires-python = ">=3.10,<3.13"
+requires-python = ">=3.10,<4"
 readme = "README.md"
 license = "MIT"
 keywords = [
@@ -13,7 +13,7 @@ keywords = [
 ]
 dependencies = [
     "loguru>=0.6.0",
-    "datacompy>=0.8.1",
+    "datacompy[spark]>=0.19.1",
 ]
 
 [project.urls]
@@ -22,8 +22,17 @@ Repository = "https://github.com/legendu-net/pysparker"
 [dependency-groups]
 dev = [
     "ruff>=0.11.7",
-    "pytype>=2020.08.10",
-    "pyspark>=3.0.1",
+    "pyspark>=3.5.6",
     "pytest>=7.1.2",
+    "deptry>=0.24.0",
+    "ty>=0.0.8",
 ]
 
+[tool.deptry.per_rule_ignores]
+DEP004 = [
+    "pyspark",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
