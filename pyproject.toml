@@ -28,3 +28,11 @@ dev = [
     "ty>=0.0.8",
 ]
 
+[tool.deptry.per_rule_ignores]
+DEP004 = [
+    "pyspark",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
