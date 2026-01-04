@@ -25,4 +25,4 @@ jobs:
         uv sync --all-extras
         brew install libmagic && brew link libmagic
     - name: Test with pytest
-      run: uv run pytest
+      run: uv run --python ${{ matrix.python-version }} pytest

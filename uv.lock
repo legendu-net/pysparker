@@ -561,7 +561,7 @@ connect = [
 [[package]]
 name = "pysparker"
 version = "0.1.1"
-source = { virtual = "." }
+source = { editable = "." }
 dependencies = [
     { name = "datacompy", extra = ["spark"] },
     { name = "loguru" },
